@@ -2,7 +2,10 @@ package container
 
 import (
 	"context"
+	"device-manager/internal/service/databus"
+	"device-manager/internal/service/telemetry"
 	"fmt"
+	"github.com/segmentio/kafka-go"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -13,9 +16,11 @@ import (
 )
 
 type Container struct {
-	Database *mongo.Client
-	Logger   *zap.SugaredLogger
-	Storage  *storage.Storage
+	Database         *mongo.Client
+	Logger           *zap.SugaredLogger
+	Storage          *storage.Storage
+	DatabusProducer  *databus.Producer
+	TelemetryService *telemetry.Service
 }
 
 func InitContainer(cfg *config.Config) (*Container, error) {
@@ -29,7 +34,8 @@ func InitContainer(cfg *config.Config) (*Container, error) {
 		return nil, err
 	}
 
-	c.initStorage()
+	c.initStorage(cfg)
+	c.InitTelemetryService()
 
 	return &c, nil
 }
@@ -68,6 +74,22 @@ func (c *Container) InitLogger() error {
 	return nil
 }
 
-func (c *Container) initStorage() {
-	c.Storage = storage.New(c.Database, c.Logger)
+func (c *Container) initDatabusProducer(cfg *config.Config) error {
+	writer := &kafka.Writer{
+		Addr:     kafka.TCP(cfg.KafkaBroker),
+		Topic:    cfg.KafkaTopic,
+		Balancer: &kafka.LeastBytes{},
+	}
+
+	c.DatabusProducer = databus.NewProducer(writer, c.Logger)
+
+	return nil
+}
+
+func (c *Container) initStorage(cfg *config.Config) {
+	c.Storage = storage.New(c.Database, c.Logger, cfg.MongoDatabase)
+}
+
+func (c *Container) InitTelemetryService() {
+	c.TelemetryService = telemetry.NewService(c.Storage, c.DatabusProducer)
 }

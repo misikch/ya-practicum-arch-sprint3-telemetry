@@ -31,10 +31,10 @@ func (s *Storage) Database() *mongo.Database {
 }
 
 type TelemetryData struct {
-	DeviceId      string                 `bson:"deviceId"`
-	DeviceType    string                 `bson:"deviceType"`
-	CreatedAt     time.Time              `bson:"createdAt"`
-	TelemetryData map[string]interface{} `bson:"telemetryData"`
+	DeviceId      string                 `bson:"deviceId" json:"deviceId"`
+	DeviceType    string                 `bson:"deviceType" json:"deviceType"`
+	CreatedAt     time.Time              `bson:"createdAt" json:"createdAt"`
+	TelemetryData map[string]interface{} `bson:"telemetryData" json:"telemetryData"`
 }
 
 // GetLatestTelemetry получает последние данные телеметрии для указанного устройства.

@@ -1,10 +1,13 @@
 package service
 
 import (
-	"device-manager/api"
-	"device-manager/internal/config"
 	"log"
 	"net/http"
+
+	"device-manager/api"
+	"device-manager/internal/config"
+	"device-manager/internal/container"
+	"device-manager/internal/handler"
 )
 
 func main() {
@@ -13,16 +16,21 @@ func main() {
 		log.Fatal("failed to init app config", err)
 	}
 
-	// Create service instance.
-	service := &petsService{
-		pets: map[int64]petstore.Pet{},
+	c, err := container.InitContainer(cfg)
+	if err != nil {
+		log.Fatal("failed to init container", err)
 	}
+
+	// Create handlers
+	handlers := handler.NewHandler(c.TelemetryService, c.Logger)
+
 	// Create generated server.
-	srv, err := api.NewServer(service)
+	srv, err := api.NewServer(handlers)
+
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := http.ListenAndServe(":8081", srv); err != nil {
+	if err := http.ListenAndServe(cfg.ServicePort, srv); err != nil {
 		log.Fatal(err)
 	}
 }
