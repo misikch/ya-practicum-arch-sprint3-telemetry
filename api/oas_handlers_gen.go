@@ -91,6 +91,14 @@ func (s *Server) handleDevicesDeviceIDTelemetryGetRequest(args [1]string, argsEs
 					Name: "device_id",
 					In:   "path",
 				}: params.DeviceID,
+				{
+					Name: "from",
+					In:   "query",
+				}: params.From,
+				{
+					Name: "to",
+					In:   "query",
+				}: params.To,
 			},
 			Raw: r,
 		}

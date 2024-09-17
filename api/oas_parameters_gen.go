@@ -5,6 +5,7 @@ package api
 import (
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/go-faster/errors"
 
@@ -18,6 +19,10 @@ import (
 // DevicesDeviceIDTelemetryGetParams is parameters of GET /devices/{device_id}/telemetry operation.
 type DevicesDeviceIDTelemetryGetParams struct {
 	DeviceID string
+	// Начальный временной штамп для получения данных.
+	From time.Time
+	// Конечный временной штамп для получения данных.
+	To time.Time
 }
 
 func unpackDevicesDeviceIDTelemetryGetParams(packed middleware.Parameters) (params DevicesDeviceIDTelemetryGetParams) {
@@ -28,10 +33,25 @@ func unpackDevicesDeviceIDTelemetryGetParams(packed middleware.Parameters) (para
 		}
 		params.DeviceID = packed[key].(string)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "from",
+			In:   "query",
+		}
+		params.From = packed[key].(time.Time)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "to",
+			In:   "query",
+		}
+		params.To = packed[key].(time.Time)
+	}
 	return params
 }
 
 func decodeDevicesDeviceIDTelemetryGetParams(args [1]string, argsEscaped bool, r *http.Request) (params DevicesDeviceIDTelemetryGetParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: device_id.
 	if err := func() error {
 		param := args[0]
@@ -74,6 +94,78 @@ func decodeDevicesDeviceIDTelemetryGetParams(args [1]string, argsEscaped bool, r
 		return params, &ogenerrors.DecodeParamError{
 			Name: "device_id",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: from.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "from",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToDateTime(val)
+				if err != nil {
+					return err
+				}
+
+				params.From = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "from",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: to.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "to",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToDateTime(val)
+				if err != nil {
+					return err
+				}
+
+				params.To = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "to",
+			In:   "query",
 			Err:  err,
 		}
 	}

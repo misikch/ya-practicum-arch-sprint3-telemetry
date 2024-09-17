@@ -42,6 +42,20 @@ paths:
           required: true
           schema:
             type: string
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Начальный временной штамп для получения данных.
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Конечный временной штамп для получения данных.
       responses:
         '200':
           description: Успешный ответ

@@ -3,12 +3,12 @@ package config
 import "github.com/kelseyhightower/envconfig"
 
 type Config struct {
-	ServicePort string `envconfig:"SERVICE_PORT" default:"8081"`
-	PgHost      string `envconfig:"PGHOST" required:"true"`
-	PgPort      string `envconfig:"PGPORT" required:"true"`
-	PgUser      string `envconfig:"PGUSER" required:"true"`
-	PgPass      string `envconfig:"PGPASSWORD" required:"true"`
-	PgDatabase  string `envconfig:"PGDATABASE" required:"true"`
+	ServicePort   string `envconfig:"SERVICE_PORT" default:"8081"`
+	MongoHost     string `envconfig:"MONGO_HOST" required:"true"`
+	MongoPort     string `envconfig:"MONGO_PORT" required:"true"`
+	MongoUser     string `envconfig:"MONGO_USER" required:"true"`
+	MongoPass     string `envconfig:"MONGO_PASSWORD" required:"true"`
+	MongoDatabase string `envconfig:"MONGO_DATABASE" required:"true"`
 }
 
 func InitConfig() (*Config, error) {

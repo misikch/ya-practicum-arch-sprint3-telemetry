@@ -2,56 +2,99 @@ package storage
 
 import (
 	"context"
-	"github.com/jmoiron/sqlx"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.uber.org/zap"
 )
 
 type Storage struct {
-	db     *sqlx.DB
-	logger Log
+	client *mongo.Client
+	logger *zap.SugaredLogger
+	dbName string
 }
 
-func New(db *sqlx.DB, logger Log) *Storage {
+// New создаёт новый экземпляр хранилища (Storage) с использованием MongoDB.
+func New(client *mongo.Client, logger *zap.SugaredLogger, dbName string) *Storage {
 	return &Storage{
-		db:     db,
+		client: client,
 		logger: logger,
+		dbName: dbName,
 	}
 }
 
-func (s *Storage) SetDeviceStatus(ctx context.Context, deviceUUID string, status string, author string) (err error) {
-	tx, err := s.db.BeginTxx(ctx, nil)
+// Database предоставляет доступ к базе данных MongoDB.
+func (s *Storage) Database() *mongo.Database {
+	return s.client.Database(s.dbName)
+}
+
+type TelemetryData struct {
+	DeviceId      string                 `bson:"deviceId"`
+	DeviceType    string                 `bson:"deviceType"`
+	CreatedAt     time.Time              `bson:"createdAt"`
+	TelemetryData map[string]interface{} `bson:"telemetryData"`
+}
+
+// GetLatestTelemetry получает последние данные телеметрии для указанного устройства.
+func (s *Storage) GetLatestTelemetry(ctx context.Context, deviceId string) (*TelemetryData, error) {
+	collection := s.Database().Collection("telemetry")
+	filter := bson.M{"deviceId": deviceId}
+	opts := options.FindOne().SetSort(bson.D{{"createdAt", -1}})
+
+	var telemetryData TelemetryData
+	err := collection.FindOne(ctx, filter, opts).Decode(&telemetryData)
 	if err != nil {
-		return
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+		s.logger.Errorw("failed to get latest telemetry", "deviceId", deviceId, "error", err)
+		return nil, err
 	}
 
-	defer func() {
-		if p := recover(); p != nil {
-			rollbackErr := tx.Rollback()
-			if err != nil {
-				s.logger.Error("recovered: failed to rollback transaction", rollbackErr)
-			}
-		} else if err != nil {
-			rollbackErr := tx.Rollback()
-			if err != nil {
-				s.logger.Error("failed to rollback transaction", rollbackErr)
-			}
-		} else {
-			err = tx.Commit()
-		}
-	}()
+	return &telemetryData, nil
+}
 
-	// Обновление статуса устройства
-	_, err = tx.ExecContext(ctx, "UPDATE devices SET status = ?, updated_at = NOW() WHERE uuid = ?", status, deviceUUID)
+// GetHistoricalTelemetry получает исторические данные телеметрии для указанного устройства за определённый период времени.
+func (s *Storage) GetHistoricalTelemetry(ctx context.Context, deviceId string, from, to time.Time) ([]TelemetryData, error) {
+	collection := s.Database().Collection("telemetry")
+	filter := bson.M{
+		"deviceId":  deviceId,
+		"createdAt": bson.M{"$gte": from, "$lte": to},
+	}
+
+	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
+		s.logger.Errorw("failed to get historical telemetry", "deviceId", deviceId, "error", err)
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var telemetryData []TelemetryData
+	if err = cursor.All(ctx, &telemetryData); err != nil {
+		s.logger.Errorw("failed to decode historical telemetry", "deviceId", deviceId, "error", err)
+		return nil, err
+	}
+
+	return telemetryData, nil
+}
+
+// AddTelemetry добавляет новые данные телеметрии для указанного устройства.
+func (s *Storage) AddTelemetry(ctx context.Context, deviceId string, deviceType string, createdAt time.Time, telemetryData map[string]interface{}) error {
+	collection := s.Database().Collection("telemetry")
+	data := TelemetryData{
+		DeviceId:      deviceId,
+		DeviceType:    deviceType,
+		CreatedAt:     createdAt,
+		TelemetryData: telemetryData,
+	}
+
+	_, err := collection.InsertOne(ctx, data)
+	if err != nil {
+		s.logger.Errorw("failed to insert telemetry data", "deviceId", deviceId, "error", err)
 		return err
 	}
 
-	// Логирование изменения статуса
-	_, err = tx.ExecContext(ctx,
-		"INSERT INTO device_status_log (device_uuid, status, author, changed_at) VALUES (?, ?, ?, NOW())",
-		deviceUUID, status, author)
-	if err != nil {
-		return
-	}
-
-	return
+	return nil
 }
