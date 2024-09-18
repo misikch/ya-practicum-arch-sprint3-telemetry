@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"device-manager/internal/entity"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
+
+	"device-manager/internal/entity"
 )
 
 func TestService_AddTelemetry(t *testing.T) {
@@ -33,10 +34,9 @@ func TestService_AddTelemetry(t *testing.T) {
 	}
 
 	type testCase struct {
-		name           string
-		mock           func()
-		expectedErr    error
-		expectedErrMsg string
+		name        string
+		mock        func()
+		expectedErr error
 	}
 
 	tests := []testCase{
