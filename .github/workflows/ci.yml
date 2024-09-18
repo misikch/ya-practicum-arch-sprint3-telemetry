@@ -16,7 +16,7 @@ jobs:
           go-version: 1.22 # используйте вашу версию Go
 
       - name: Install go.uber.mockgen
-        run: go install go.uber.org/mock/mockgen@v1.6.0
+        run: go install go.uber.org/mock/mockgen@v0.4.0
 
       - name: Run go generate
         run: go generate ./...
