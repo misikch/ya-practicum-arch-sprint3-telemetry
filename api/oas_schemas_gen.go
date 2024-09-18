@@ -35,42 +35,40 @@ type DevicesDeviceIDTelemetryPostNotFound ErrorResponse
 func (*DevicesDeviceIDTelemetryPostNotFound) devicesDeviceIDTelemetryPostRes() {}
 
 type DevicesDeviceIDTelemetryPostReq struct {
-	DeviceType    OptString                                     `json:"deviceType"`
-	CreatedAt     OptDateTime                                   `json:"createdAt"`
-	TelemetryData *DevicesDeviceIDTelemetryPostReqTelemetryData `json:"telemetryData"`
+	DeviceType    string    `json:"deviceType"`
+	CreatedAt     time.Time `json:"createdAt"`
+	TelemetryData string    `json:"telemetryData"`
 }
 
 // GetDeviceType returns the value of DeviceType.
-func (s *DevicesDeviceIDTelemetryPostReq) GetDeviceType() OptString {
+func (s *DevicesDeviceIDTelemetryPostReq) GetDeviceType() string {
 	return s.DeviceType
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *DevicesDeviceIDTelemetryPostReq) GetCreatedAt() OptDateTime {
+func (s *DevicesDeviceIDTelemetryPostReq) GetCreatedAt() time.Time {
 	return s.CreatedAt
 }
 
 // GetTelemetryData returns the value of TelemetryData.
-func (s *DevicesDeviceIDTelemetryPostReq) GetTelemetryData() *DevicesDeviceIDTelemetryPostReqTelemetryData {
+func (s *DevicesDeviceIDTelemetryPostReq) GetTelemetryData() string {
 	return s.TelemetryData
 }
 
 // SetDeviceType sets the value of DeviceType.
-func (s *DevicesDeviceIDTelemetryPostReq) SetDeviceType(val OptString) {
+func (s *DevicesDeviceIDTelemetryPostReq) SetDeviceType(val string) {
 	s.DeviceType = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *DevicesDeviceIDTelemetryPostReq) SetCreatedAt(val OptDateTime) {
+func (s *DevicesDeviceIDTelemetryPostReq) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
 }
 
 // SetTelemetryData sets the value of TelemetryData.
-func (s *DevicesDeviceIDTelemetryPostReq) SetTelemetryData(val *DevicesDeviceIDTelemetryPostReqTelemetryData) {
+func (s *DevicesDeviceIDTelemetryPostReq) SetTelemetryData(val string) {
 	s.TelemetryData = val
 }
-
-type DevicesDeviceIDTelemetryPostReqTelemetryData struct{}
 
 // Ref: #/components/schemas/ErrorResponse
 type ErrorResponse struct {
@@ -238,10 +236,10 @@ func (o OptString) Or(d string) string {
 
 // Ref: #/components/schemas/TelemetryData
 type TelemetryData struct {
-	DeviceId      OptString                   `json:"deviceId"`
-	DeviceType    OptString                   `json:"deviceType"`
-	CreatedAt     OptDateTime                 `json:"createdAt"`
-	TelemetryData *TelemetryDataTelemetryData `json:"telemetryData"`
+	DeviceId      OptString   `json:"deviceId"`
+	DeviceType    OptString   `json:"deviceType"`
+	CreatedAt     OptDateTime `json:"createdAt"`
+	TelemetryData OptString   `json:"telemetryData"`
 }
 
 // GetDeviceId returns the value of DeviceId.
@@ -260,7 +258,7 @@ func (s *TelemetryData) GetCreatedAt() OptDateTime {
 }
 
 // GetTelemetryData returns the value of TelemetryData.
-func (s *TelemetryData) GetTelemetryData() *TelemetryDataTelemetryData {
+func (s *TelemetryData) GetTelemetryData() OptString {
 	return s.TelemetryData
 }
 
@@ -280,11 +278,9 @@ func (s *TelemetryData) SetCreatedAt(val OptDateTime) {
 }
 
 // SetTelemetryData sets the value of TelemetryData.
-func (s *TelemetryData) SetTelemetryData(val *TelemetryDataTelemetryData) {
+func (s *TelemetryData) SetTelemetryData(val OptString) {
 	s.TelemetryData = val
 }
 
 func (*TelemetryData) devicesDeviceIDTelemetryLatestGetRes() {}
 func (*TelemetryData) devicesDeviceIDTelemetryPostRes()      {}
-
-type TelemetryDataTelemetryData struct{}

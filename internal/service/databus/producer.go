@@ -3,10 +3,11 @@ package databus
 import (
 	"context"
 	"encoding/json"
-	"time"
 
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
+
+	"device-manager/internal/entity"
 )
 
 type Producer struct {
@@ -21,15 +22,8 @@ func NewProducer(writer *kafka.Writer, logger *zap.SugaredLogger) *Producer {
 	}
 }
 
-type TelemetryMessage struct {
-	DeviceId      string                 `json:"deviceId"`
-	DeviceType    string                 `json:"deviceType"`
-	CreatedAt     time.Time              `json:"createdAt"`
-	TelemetryData map[string]interface{} `json:"telemetryData"`
-}
-
 // PublishTelemetry публикует событие телеметрии в Kafka.
-func (p *Producer) PublishTelemetry(ctx context.Context, msg TelemetryMessage) error {
+func (p *Producer) PublishTelemetry(ctx context.Context, msg entity.TelemetryData) error {
 	message, err := json.Marshal(msg)
 	if err != nil {
 		p.logger.Errorw("failed to marshal telemetry message", "error", err)

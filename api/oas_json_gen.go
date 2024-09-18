@@ -3,12 +3,15 @@
 package api
 
 import (
+	"math/bits"
+	"strconv"
 	"time"
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
 
 	"github.com/ogen-go/ogen/json"
+	"github.com/ogen-go/ogen/validate"
 )
 
 // Encode encodes DevicesDeviceIDTelemetryGetInternalServerError as json.
@@ -299,22 +302,16 @@ func (s *DevicesDeviceIDTelemetryPostReq) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *DevicesDeviceIDTelemetryPostReq) encodeFields(e *jx.Encoder) {
 	{
-		if s.DeviceType.Set {
-			e.FieldStart("deviceType")
-			s.DeviceType.Encode(e)
-		}
+		e.FieldStart("deviceType")
+		e.Str(s.DeviceType)
 	}
 	{
-		if s.CreatedAt.Set {
-			e.FieldStart("createdAt")
-			s.CreatedAt.Encode(e, json.EncodeDateTime)
-		}
+		e.FieldStart("createdAt")
+		json.EncodeDateTime(e, s.CreatedAt)
 	}
 	{
-		if s.TelemetryData != nil {
-			e.FieldStart("telemetryData")
-			s.TelemetryData.Encode(e)
-		}
+		e.FieldStart("telemetryData")
+		e.Str(s.TelemetryData)
 	}
 }
 
@@ -329,13 +326,16 @@ func (s *DevicesDeviceIDTelemetryPostReq) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode DevicesDeviceIDTelemetryPostReq to nil")
 	}
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
 		case "deviceType":
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.DeviceType.Reset()
-				if err := s.DeviceType.Decode(d); err != nil {
+				v, err := d.Str()
+				s.DeviceType = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -343,9 +343,11 @@ func (s *DevicesDeviceIDTelemetryPostReq) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"deviceType\"")
 			}
 		case "createdAt":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.CreatedAt.Reset()
-				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
+				v, err := json.DecodeDateTime(d)
+				s.CreatedAt = v
+				if err != nil {
 					return err
 				}
 				return nil
@@ -353,13 +355,13 @@ func (s *DevicesDeviceIDTelemetryPostReq) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"createdAt\"")
 			}
 		case "telemetryData":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				s.TelemetryData = nil
-				var elem DevicesDeviceIDTelemetryPostReqTelemetryData
-				if err := elem.Decode(d); err != nil {
+				v, err := d.Str()
+				s.TelemetryData = string(v)
+				if err != nil {
 					return err
 				}
-				s.TelemetryData = &elem
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"telemetryData\"")
@@ -370,6 +372,38 @@ func (s *DevicesDeviceIDTelemetryPostReq) Decode(d *jx.Decoder) error {
 		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode DevicesDeviceIDTelemetryPostReq")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDevicesDeviceIDTelemetryPostReq) {
+					name = jsonFieldsNameOfDevicesDeviceIDTelemetryPostReq[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
 
 	return nil
@@ -384,50 +418,6 @@ func (s *DevicesDeviceIDTelemetryPostReq) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DevicesDeviceIDTelemetryPostReq) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *DevicesDeviceIDTelemetryPostReqTelemetryData) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *DevicesDeviceIDTelemetryPostReqTelemetryData) encodeFields(e *jx.Encoder) {
-}
-
-var jsonFieldsNameOfDevicesDeviceIDTelemetryPostReqTelemetryData = [0]string{}
-
-// Decode decodes DevicesDeviceIDTelemetryPostReqTelemetryData from json.
-func (s *DevicesDeviceIDTelemetryPostReqTelemetryData) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode DevicesDeviceIDTelemetryPostReqTelemetryData to nil")
-	}
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		default:
-			return d.Skip()
-		}
-	}); err != nil {
-		return errors.Wrap(err, "decode DevicesDeviceIDTelemetryPostReqTelemetryData")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *DevicesDeviceIDTelemetryPostReqTelemetryData) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DevicesDeviceIDTelemetryPostReqTelemetryData) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -645,7 +635,7 @@ func (s *TelemetryData) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.TelemetryData != nil {
+		if s.TelemetryData.Set {
 			e.FieldStart("telemetryData")
 			s.TelemetryData.Encode(e)
 		}
@@ -699,12 +689,10 @@ func (s *TelemetryData) Decode(d *jx.Decoder) error {
 			}
 		case "telemetryData":
 			if err := func() error {
-				s.TelemetryData = nil
-				var elem TelemetryDataTelemetryData
-				if err := elem.Decode(d); err != nil {
+				s.TelemetryData.Reset()
+				if err := s.TelemetryData.Decode(d); err != nil {
 					return err
 				}
-				s.TelemetryData = &elem
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"telemetryData\"")
@@ -729,50 +717,6 @@ func (s *TelemetryData) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *TelemetryData) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *TelemetryDataTelemetryData) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *TelemetryDataTelemetryData) encodeFields(e *jx.Encoder) {
-}
-
-var jsonFieldsNameOfTelemetryDataTelemetryData = [0]string{}
-
-// Decode decodes TelemetryDataTelemetryData from json.
-func (s *TelemetryDataTelemetryData) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode TelemetryDataTelemetryData to nil")
-	}
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		default:
-			return d.Skip()
-		}
-	}); err != nil {
-		return errors.Wrap(err, "decode TelemetryDataTelemetryData")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *TelemetryDataTelemetryData) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *TelemetryDataTelemetryData) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

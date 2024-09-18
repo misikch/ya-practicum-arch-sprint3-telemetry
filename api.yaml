@@ -92,6 +92,10 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - deviceType
+                - createdAt
+                - telemetryData
               properties:
                 deviceType:
                   type: string
@@ -99,7 +103,7 @@ paths:
                   type: string
                   format: date-time
                 telemetryData:
-                  type: object
+                  type: string
       responses:
         '200':
           description: Успешный ответ
@@ -132,7 +136,7 @@ components:
           type: string
           format: date-time
         telemetryData:
-          type: object
+          type: string
     ErrorResponse:
       type: object
       properties:

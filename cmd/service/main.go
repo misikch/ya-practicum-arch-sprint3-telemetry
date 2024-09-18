@@ -1,6 +1,7 @@
-package service
+package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -13,12 +14,12 @@ import (
 func main() {
 	cfg, err := config.InitConfig()
 	if err != nil {
-		log.Fatal("failed to init app config", err)
+		log.Fatal("failed to init app config: ", err)
 	}
 
 	c, err := container.InitContainer(cfg)
 	if err != nil {
-		log.Fatal("failed to init container", err)
+		log.Fatal("failed to init container: ", err)
 	}
 
 	// Create handlers
@@ -30,7 +31,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := http.ListenAndServe(cfg.ServicePort, srv); err != nil {
+
+	fmt.Printf("starting service at :%s ...\n", cfg.ServicePort)
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.ServicePort), srv); err != nil {
 		log.Fatal(err)
 	}
 }

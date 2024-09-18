@@ -8,14 +8,15 @@ import (
 )
 
 type Config struct {
-	ServicePort   string `envconfig:"SERVICE_PORT" default:"8082"`
-	MongoHost     string `envconfig:"MONGO_HOST" required:"true"`
-	MongoPort     string `envconfig:"MONGO_PORT" required:"true"`
-	MongoUser     string `envconfig:"MONGO_USER" required:"true"`
-	MongoPass     string `envconfig:"MONGO_PASSWORD" required:"true"`
-	MongoDatabase string `envconfig:"MONGO_DATABASE" required:"true"`
-	KafkaBroker   string `envconfig:"KAFKA_BROKER" required:"true"` //example: KAFKA_BROKER=kafka-broker:9092 or KAFKA_BROKER=kafka-broker1:9092,kafka-broker2:9092,kafka-broker3:9092
-	KafkaTopic    string `envconfig:"KAFKA_TOPIC" required:"true"`
+	ServicePort         string `envconfig:"SERVICE_PORT" default:"8082"`
+	MongoHost           string `envconfig:"MONGO_HOST" required:"true"`
+	MongoPort           string `envconfig:"MONGO_PORT" required:"true"`
+	MongoUser           string `envconfig:"MONGO_USER" required:"true"`
+	MongoPass           string `envconfig:"MONGO_PASSWORD" required:"true"`
+	MongoDatabase       string `envconfig:"MONGO_DATABASE" required:"true"`
+	KafkaBroker         string `envconfig:"KAFKA_BROKER" required:"true"` //example: KAFKA_BROKER=kafka-broker:9092 or KAFKA_BROKER=kafka-broker1:9092,kafka-broker2:9092,kafka-broker3:9092
+	KafkaTelemetryTopic string `envconfig:"KAFKA_TELEMETRY_TOPIC" required:"true"`
+	KafkaDevicesTopic   string `envconfig:"KAFKA_DEVICES_TOPIC" required:"true"`
 }
 
 func InitConfig() (*Config, error) {
@@ -26,6 +27,6 @@ func InitConfig() (*Config, error) {
 		log.Println("No .env file found, using environment variables")
 	}
 
-	err = envconfig.Process("deviceManager", &cfg)
+	err = envconfig.Process("deviceManager", cfg)
 	return cfg, err
 }

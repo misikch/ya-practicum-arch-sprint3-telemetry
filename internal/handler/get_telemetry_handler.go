@@ -30,10 +30,10 @@ func (h Handler) DevicesDeviceIDTelemetryGet(
 
 	for _, tdata := range res {
 		out = append(out, api.TelemetryData{
-			DeviceId:   api.NewOptString(tdata.DeviceId),
-			DeviceType: api.NewOptString(tdata.DeviceType),
-			CreatedAt:  api.NewOptDateTime(tdata.CreatedAt),
-			//TelemetryData: &TelemetryDataTelemetryData{},
+			DeviceId:      api.NewOptString(tdata.DeviceId),
+			DeviceType:    api.NewOptString(tdata.DeviceType),
+			CreatedAt:     api.NewOptDateTime(tdata.CreatedAt),
+			TelemetryData: api.NewOptString(tdata.TelemetryData),
 		})
 	}
 

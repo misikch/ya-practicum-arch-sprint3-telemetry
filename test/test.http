@@ -1,0 +1,40 @@
+### post telemetry for not found device
+POST http://{{host}}/devices/uuidNotFound/telemetry
+Content-Type: application/json
+X-Source: test.http
+
+{
+  "deviceType": "light",
+  "createdAt": "2024-01-21T09:04:05Z",
+  "telemetryData": "hall_light:on;room_1_light:on"
+}
+
+### post telemetry data 1
+POST http://{{host}}/devices/uuid11/telemetry
+Content-Type: application/json
+X-Source: test.http
+
+{
+  "deviceType": "light",
+  "createdAt": "2024-01-21T09:00:00Z",
+  "telemetryData": "hall_light:on;room_1_light:on"
+}
+
+### post telemetry data 2
+POST http://{{host}}/devices/uuid11/telemetry
+Content-Type: application/json
+X-Source: test.http
+
+{
+  "deviceType": "light",
+  "createdAt": "2024-01-22T15:05:05Z",
+  "telemetryData": "hall_light:on;room_1_light:on"
+}
+
+### get telemetry history data
+GET http://{{host}}/devices/uuid11/telemetry?from=2024-01-20T15:05:05Z&to=2024-01-30T15:05:05Z
+X-Source: test.http
+
+### get telemetry latest data
+GET http://{{host}}/devices/uuid11/telemetry/latest
+X-Source: test.http
